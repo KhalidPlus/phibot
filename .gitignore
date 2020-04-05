@@ -1,0 +1,20 @@
+# See https://help.github.com/ignore-files/ for more about ignoring files.
+
+# vscode configuration
+.vscode/
+
+# node
+node_modules/
+package-lock.json
+
+# configs
+config/credentials.json
+config/admins.json
+
+# logs
+errors.log
+phibot.db
+process.log
+
+# nothing to see here
+modules/hidden.js

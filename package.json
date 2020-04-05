@@ -1,0 +1,22 @@
+{
+  "name": "phibot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Zipdox",
+  "license": "GPL-2.0",
+  "dependencies": {
+    "convert-units": "^2.3.4",
+    "firebase": "^6.3.4",
+    "https": "^1.0.0",
+    "jsdom": "^15.1.1",
+    "mathjs": "^6.2.5",
+    "mineflayer": "^2.9.0",
+    "request": "^2.88.0",
+    "sqlite3": "^4.1.0",
+    "ws": "^7.1.1"
+  },
+  "description": ""
+}
