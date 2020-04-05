@@ -61,6 +61,7 @@ function loadCommands(){
 loadCommands();
 
 
+
 const username_filter = new RegExp("^[a-zA-Z0-9_]{1,16}$");
 
 const random = {
@@ -75,14 +76,38 @@ const random = {
     }
 }
 
+function greenText(text){
+    say(`> ${text}`);
+}
 
+function whisper(user, text){
+    bot.chat(`/w ${user} ${text}`);
+}
+
+function say(text){
+    text = text.replace(/\n/g, ' ');
+    if(text.length > 256){
+        text = text.match(/.{1,256}/g)[0];
+    }
+    bot.chat(text);
+}
+
+function escapeHtml(unsafe) {
+    return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+
+
+var waitingForOnline = false;
 async function startBot(){
     let pingResponse = await mcping(credentials);
     if(pingResponse.errno){
-        logEvent('Not starting bot because server offline');
+        if(!waitingForOnline) logEvent('Not starting bot because server offline');
+        waitingForOnline = true;
         setTimeout(startBot, 10000);
         return;
     };
+    waitingForOnline = false;
     logEvent('Starting bot');
 
     bot = mineflayer.createBot(credentials);
@@ -90,7 +115,7 @@ async function startBot(){
     bot.on('login', function(){
         logEvent(`Logged in as ${bot.username}`);
     });
-    
+
     bot.on('end', function(){
         logEvent('Connection ended');
         setTimeout(startBot, 10000);
@@ -109,7 +134,7 @@ async function startBot(){
     });
 
     bot.on('playerLeft', function(player){
-        onPlayerLeft(player)
+        onPlayerLeft(player);
     });
 }
 startBot();
@@ -123,25 +148,17 @@ function shutDown(username){
     }else{
         logEvent(`PhiBot shut down from console`);
     }
+    console.log('one');
     say("Shutting down.");
+    console.log('two');
     bot.quit();
+    console.log('three');
     botdb.close();
+    console.log('four');
     setTimeout(function(){
         exec('screen -S phibot -X stuff "^C"');
     }, 2000);
 }
-
-function restart(username){
-    if(username){
-        logEvent(`PhiBot restarted by ${username}`);
-    }else{
-        logEvent(`PhiBot restarted from console`);
-    }
-    say("Restarting...");
-    bot.quit();
-    loadCommands();
-}
-
 
 
 
@@ -238,8 +255,6 @@ function onWhisper(username, message){
     if(admins[bot.players[username].uuid] != undefined){
         if(message.startsWith('shutdown')){
             shutDown(username);
-        }else if(message.startsWith('restart')){
-            restart(username);
         }else{
             say(message);
         }
@@ -267,10 +282,7 @@ function onChat(username, message, translate, jsonMsg){
 
 
 function onPlayerLeft(player){
-    if(player.username == storyTelling){
-        storyTelling = undefined;
-        say(`Storytelling stopped because ${player.username} disconnected.`);
-    }
+    return;
 };
 
 
