@@ -21,8 +21,9 @@ const firebase = require('firebase');
 const convert = require('convert-units');
 const sqlite3 = require('sqlite3');
 const exec = require('child_process').exec;
-var calculate = require('mathjs').evaluate;
+const calculate = require('mathjs').evaluate;
 const mcping = require('./ping-promise');
+const cleverbot = require('cleverbot-free');
 
 var errorstream = fs.createWriteStream('errors.log', {flags:'a'});
 var logstream = fs.createWriteStream('process.log', {flags:'a'});
@@ -43,9 +44,6 @@ var bot;
 
 console.log(new Date().toUTCString());
 
-
-// var chatstream = fs.createWriteStream('chat.log', {flags:'a'});
-// var btstream = fs.createWriteStream('2b2t.log', {flags: 'a'});
 
 
 var commands;
@@ -251,7 +249,8 @@ function onMessage(jsonMsg){
 };
 
 
-function onWhisper(username, message){
+var cleverbotConvos = {};
+async function onWhisper(username, message){
     if(admins[bot.players[username].uuid] != undefined){
         if(message.startsWith('shutdown')){
             shutDown(username);
@@ -259,15 +258,28 @@ function onWhisper(username, message){
             say(message);
         }
     }else{
-        for(var admin in admins){
-            if(bot.players[admins[admin]] != undefined) say(`/w ${admins[admin]} <${username}> ${message}`);
+        // for(var admin in admins){
+        //     if(bot.players[admins[admin]] != undefined) say(`/w ${admins[admin]} <${username}> ${message}`);
+        // }
+        if(cleverbotConvos[username] == undefined){
+            cleverbotConvos[username] = [];
+            const response = await cleverbot(message)
+            cleverbotConvos[username].push(message);
+            cleverbotConvos[username].push(response);
+            whisper(username, response);
+        }else{
+            const response = await cleverbot(message, cleverbotConvos[username]);
+            cleverbotConvos[username].push(message);
+            cleverbotConvos[username].push(response);
+            whisper(username, response);
         }
     }
 };
 
 
 function onChat(username, message, translate, jsonMsg){
-    if(username == bot.username || jsonMsg.extra[0].color == 'light_purple') return;
+    if(username == bot.username) return;
+    if(jsonMsg.extra[0].color == 'light_purple') return;
     for(var chatevent of chatevents){
         chatevent(username, message, translate, jsonMsg);
     }

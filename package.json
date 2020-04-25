@@ -8,6 +8,7 @@
   "author": "Zipdox",
   "license": "GPL-2.0",
   "dependencies": {
+    "cleverbot-free": "^1.0.3",
     "convert-units": "^2.3.4",
     "firebase": "^6.3.4",
     "https": "^1.0.0",
