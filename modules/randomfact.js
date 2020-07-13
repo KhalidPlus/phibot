@@ -5,10 +5,10 @@ commands['fact'] = function(){
         'User-Agent': 'request'
         }
     };
-    request(options, function(error, response, body){
-        var searchPage = new JSDOM(body);
-        var fact = searchPage.window.document.getElementById('f').getElementsByTagName('div')[0].textContent.split('\n', 1)[0].trim().replace(/\\\"/g, `"`);
-        greenText(fact);
-//        console.log(fact);
+    
+    fetch('http://example.com/movies.json').then(response => response.text()).then(data => {
+        const searchPage = new JSDOM(data);
+        const fact = searchPage.window.document.getElementById('z').innerText.split('\n')[0];
+        greenText('fact');
     });
 }
