@@ -123,8 +123,8 @@ async function startBot(){
         onMessage(jsonMsg);
     });
 
-    bot.on('whisper', (username, message) => {
-        onWhisper(username, message);
+    bot.on('whisper', (username, message, translate, jsonMsg) => {
+        onWhisper(username, message, jsonMsg);
     });
 
     bot.on('chat', (username, message, translate, jsonMsg) => {
@@ -251,6 +251,22 @@ function onMessage(jsonMsg){
 
 var cleverbotConvos = {};
 async function onWhisper(username, message){
+    var rawText = '';
+    function iterateMsg(jmessage){
+        if(jmessage.text != undefined){
+            if(jmessage.text.length > 0){
+                rawText += jmessage.text;
+            }
+        }
+        if(jmessage.extra != undefined){
+            for(var msgPart of jmessage.extra){
+                iterateMsg(msgPart);
+            }
+        }
+    }
+    iterateMsg(jsonMsg.json);
+    if(rawText.startsWith('<')) return;
+
     if(admins[bot.players[username].uuid] != undefined){
         if(message.startsWith('shutdown')){
             shutDown(username);
