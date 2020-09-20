@@ -1,5 +1,5 @@
 //    PhiBot, a Minecraft bot for anarchy servers.
-//    Copyright (C) 2019 Zipdox
+//    Copyright (C) 2020 Zipdox
 //
 //    This program is free software; you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -14,14 +14,8 @@
 
 const mineflayer = require('mineflayer');
 const fs = require('fs');
-const request = require('request');
-const fetch = require('node-fetch');
-const { JSDOM } = require("jsdom");
-const firebase = require('firebase');
-const convert = require('convert-units');
 const sqlite3 = require('sqlite3');
 const exec = require('child_process').exec;
-const calculate = require('mathjs').evaluate;
 const mcping = require('./ping-promise');
 const cleverbot = require('cleverbot-free');
 
@@ -36,43 +30,68 @@ function logEvent(message){
 }
 
 
-const credentials = JSON.parse(fs.readFileSync('config/credentials.json', 'utf8'));
-const admins = JSON.parse(fs.readFileSync('config/admins.json', 'utf8'));
+var credentials = require('./config/credentials.json');
+try{
+    const tokens = require('./config/tokens.json');
+    credentials.clientToken = tokens.clientToken;
+    credentials.accessToken = tokens.accessToken;
+}catch(error){
+    logEvent('No token file present, logging in with password.');
+}
+
+
+const admins = require('./config/admins.json');
 const botdb = new sqlite3.Database('phibot.db');
 var bot;
 
 
 console.log(new Date().toUTCString());
 
-
-
-var commands;
-var chatevents;
-function loadCommands(){
-    commands = {};
-    chatevents = [];
-    for(var module of fs.readdirSync('modules/')){
-        eval(fs.readFileSync(`modules/${module}`, 'utf8'));
-        console.log("Finished loading", module);
-    }
+function playerList(){
+    return bot.players;
 }
-loadCommands();
 
 
 
-const username_filter = new RegExp("^[a-zA-Z0-9_]{1,16}$");
+// Import bot modules
+var commands = {};
+var chatevents = [];
+commands.quote = require('./modules/quote')(say);
+commands.fact = commands.randomfact = require('./modules/randomfact')(greenText);
+chatevents.push(require('./modules/2b2t')(say, botdb));
+commands['8ball'] = require('./modules/8ball')(say);
+commands.convert = require('./modules/convert')(say);
+commands.dadjoke = require('./modules/dadjoke')(greenText);
+// chatevents.discord = require('./modules/discord')(say, botdb); // Too lazy to convert from request to fetch and nobody uses it
+// chatevents.setdiscord = require('./modules/setdiscord')(say, botdb); // Too lazy to convert from request to fetch and nobody uses it
+commands.exchange = require('./modules/exchange')(say);
+commands.help = commands.h = require('./modules/help')(whisper);
+commands.jared2013 = commands.jared = require('./modules/jared2013')(greenText);
+commands.popbob = require('./modules/popbob')(greenText);
+commands.rule = commands.internetrule = require('./modules/internetrule')(say, greenText);
+commands.freedom = require('./modules/freedom')(say);
+commands.calc = commands.calculate = commands.math = require('./modules/math')(say, whisper);
+commands.ping = commands.p = require('./modules/ping')(say, playerList);
+commands.bestping = commands.bp = require('./modules/bestping')(say, playerList);
+commands.worstping = commands.wp = require('./modules/worstping')(say, playerList);
+commands.averageping = commands.ap = require('./modules/averageping')(say, playerList);
+commands.mcfact = commands.minecraftfact = require('./modules/mcfact')(greenText);
+commands.randommsg = commands.randommessage = require('./modules/randommsg')(say, whisper, botdb);
+commands.lastmsg = commands.lastmessage = require('./modules/lastmsg')(say, botdb);
+commands.firstmsg = commands.firstmessage = require('./modules/firstmsg')(say, botdb);
+commands.msgcount = commands.messagecount = require('./modules/msgcount')(say, botdb);
+commands.namemc = require('./modules/namemc')(say);
+commands.playtime = commands.pt = require('./modules/playtime')(say);
+commands.record = require('./modules/record')(say, botdb);
+commands.pornhub = commands.ph = require('./modules/pornhub')(say);
+commands.seed = require('./modules/seed')(say);
+commands.dox = require('./modules/dox')(say);
+commands.kill = require('./modules/kill')(whisper);
+commands.git = commands.github = require('./modules/git')(say);
+commands.contact = require('./modules/contact')(say);
+commands.time = require('./modules/timezone')(say);
+commands.urbandictionary = commands.ud = require('./modules/urbandictionary')(say);
 
-const random = {
-    int: function(min, max){
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    },
-    float: function(min, max){
-        return Math.random() * (max - min) + min;
-    },
-    pick: function(array){
-        return array[Math.floor(Math.random() * Math.floor(array.length))];
-    }
-}
 
 function greenText(text){
     say(`> ${text}`);
@@ -112,6 +131,14 @@ async function startBot(){
 
     bot.on('login', function(){
         logEvent(`Logged in as ${bot.username}`);
+        fs.writeFile(
+            'config/tokens.json',
+            JSON.stringify({
+                clientToken: bot._client.session.clientToken,
+                accessToken: bot._client.session.accessToken
+            }, null, 4),
+            ()=>{return}
+        );
     });
 
     bot.on('end', function(){
@@ -146,13 +173,9 @@ function shutDown(username){
     }else{
         logEvent(`PhiBot shut down from console`);
     }
-    console.log('one');
     say("Shutting down.");
-    console.log('two');
     bot.quit();
-    console.log('three');
     botdb.close();
-    console.log('four');
     setTimeout(function(){
         exec('screen -S phibot -X stuff "^C"');
     }, 2000);
@@ -295,7 +318,7 @@ async function onWhisper(username, message){
 
 function onChat(username, message, translate, jsonMsg){
     if(username == bot.username) return;
-    if(jsonMsg.extra[0].color == 'light_purple') return;
+    if(jsonMsg.extra) if(jsonMsg.extra[0].color == 'light_purple') return;
     for(var chatevent of chatevents){
         chatevent(username, message, translate, jsonMsg);
     }
@@ -318,11 +341,11 @@ setInterval(function(){
     if(bot.entity != undefined){
         var yaw = Math.random() * 2 * Math.PI - Math.PI;
         var pitch = Math.random() * Math.PI - (0.5 * Math.PI);
-        bot.look(yaw, pitch, true);
+        bot.look(yaw, pitch, true, ()=>{return});
     }
 }, 12000);
 
 setInterval(function(){
     if(bot.entity == undefined) startBot();
-    commands["fact"]();
+    commands.fact();
 }, 300000);

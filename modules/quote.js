@@ -1,4 +1,12 @@
-commands['quote'] = async function(username, args){
+const fetch = require('node-fetch');
+const { JSDOM } = require('jsdom');
+
+
+var say;
+function randomPick(array){
+    return array[Math.floor(Math.random() * Math.floor(array.length))];
+}
+async function quote(username, args){
     const searchTerm = args.join(' ');
     if(searchTerm.length < 6 || searchTerm.length > 100){
         say('Please enter a name between 6 and 100 characters.');
@@ -21,12 +29,14 @@ commands['quote'] = async function(username, args){
     const resultsResponseText = await resultsResponse.text();
     const resultsPage = new JSDOM(resultsResponseText).window.document;
     const resultsQuotes = resultsPage.getElementsByClassName('grid-item boxy');
-    const pickedQuote = random.pick(resultsQuotes);
+    const pickedQuote = randomPick(resultsQuotes);
     
     const quoteText = pickedQuote.getElementsByClassName('oncl_q')[0].textContent;
     const quoteName = pickedQuote.getElementsByClassName('oncl_a')[0].textContent;
-    say(`❝${quoteText}❞ ～${quoteName}`);
-    
+    say(`❝${quoteText}❞ ～${quoteName}`);   
+}
 
-    
+module.exports = function(sayFunc){
+    say = sayFunc;
+    return quote;
 }

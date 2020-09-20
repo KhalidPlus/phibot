@@ -1,6 +1,8 @@
+const username_filter = new RegExp("^[a-zA-Z0-9_]{1,16}$");
+var say;
+var botdb;
 var msgIng = false;
-
-commands['firstmsg'] = commands['firstmessage'] = commands['firstwords'] = function(username, args){
+function firstMsg(username, args){
     if(msgIng == true) return;
     msgIng = true;
     if(args[0] != undefined) username = args[0];
@@ -23,3 +25,8 @@ commands['firstmsg'] = commands['firstmessage'] = commands['firstwords'] = funct
     });
 }
 
+module.exports = function(sayFunc, botdbVar){
+    say = sayFunc;
+    botdb = botdbVar;
+    return firstMsg;
+}

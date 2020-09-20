@@ -1,0 +1,3 @@
+- Make import modules proper
+- fix 1337x
+- fix thepiratebay

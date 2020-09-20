@@ -1,4 +1,10 @@
-commands['namemc'] = function(sender, args){
+const fetch = require('node-fetch');
+const { JSDOM } = require("jsdom");
+
+
+const username_filter = new RegExp("^[a-zA-Z0-9_]{1,16}$");
+var say;
+async function namemc(sender, args){
     var username = args[0]
     if(username == undefined){
         say('Please provide a username.');
@@ -8,35 +14,26 @@ commands['namemc'] = function(sender, args){
         say(`"${username}" is not a valid username.`);
         return;
     }
-    request(`https://api.mojang.com/users/profiles/minecraft/${username}`, function (error, response, body) {
-        if (error) {
-            say('There was an error requesting player data.');
-            return;
-        }
-        if(body.length == 0){
-            say(`No player with username "${username}".`);
-            return;
+    const usernameRequest = await fetch(`https://api.mojang.com/users/profiles/minecraft/${username}`);
+    const usernameResult = await usernameRequest.json().catch(error => {
+        say(`No player with username "${username}".`);
+    });
+    if(usernameResult == undefined) return;
+    const requestHistory = await fetch(`https://api.mojang.com/user/profiles/${usernameResult.id}/names`);
+    const history = await requestHistory.json();
+    let output = [];
+    history.forEach(element => {
+        if(element.changedToAt != undefined){
+            var changeDate = `${new Date(element.changedToAt).toDateString()}`.split(' ').slice(1,10).join(' ');
+            output.push(`${element.name} <${changeDate}>`);
         }else{
-            let playerid = JSON.parse(body)['id'];
-            let playername = JSON.parse(body)['name'];
-            request(`https://api.mojang.com/user/profiles/${playerid}/names`, function (error, response, body) {
-                if (error) {
-                    say(`There was an error requesting the history of "${playername}".`);
-                    return;
-                } else {
-                    let history = JSON.parse(body);
-                    let output = [];
-                    history.forEach(element => {
-                        if(element.changedToAt != undefined){
-                            var changeDate = `${new Date(element.changedToAt).toDateString()}`.split(' ').slice(1,10).join(' ');
-                            output.push(`${element.name} <${changeDate}>`);
-                        }else{
-                            output.push(element.name);
-                        }
-                    });
-                    say(output.join(', '));
-                }
-            });
+            output.push(element.name);
         }
     });
+    say(output.join(', '));
+}
+
+module.exports = function(sayFunc){
+    say = sayFunc;
+    return namemc;
 }

@@ -1,4 +1,7 @@
-commands['convert'] = function(username, args){
+const convert = require('convert-units');
+
+
+function convertFunc(username, args){
     var amount = args[0];
     var fromUnit = args[1];
     var toUnit = args[2];
@@ -7,10 +10,21 @@ commands['convert'] = function(username, args){
         return;
     }
     var result;
+    var errored = false;
     try{
         result = convert(amount).from(fromUnit).to(toUnit);
     }catch(error){
         result = error.message;
+        errored = true;
     }
-    say(result.toString());
+    if(errored){
+        say(result.toString());
+    }else{
+        say(result.toString() + ' ' + toUnit);
+    }
+}
+
+module.exports = function(sayFunc){
+    say = sayFunc;
+    return convertFunc;
 }

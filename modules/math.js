@@ -1,6 +1,10 @@
-var isCalculating = false;
+const calculate = require('mathjs').evaluate;
 
-commands['math'] = commands['calc'] = commands['calculate'] = function(username, args){
+
+var isCalculating = false;
+var say;
+var whisper;
+function calc(username, args){
     if(isCalculating) return;
     isCalculating = true;
 
@@ -19,4 +23,10 @@ commands['math'] = commands['calc'] = commands['calculate'] = function(username,
     setTimeout(function(){
         isCalculating = false;
     }, 10000);
+}
+
+module.exports = function(sayFunc, whisperFunc){
+    say = sayFunc;
+    whisper = whisperFunc;
+    return calc;
 }

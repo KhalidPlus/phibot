@@ -10,6 +10,7 @@ package-lock.json
 # configs
 config/credentials.json
 config/admins.json
+config/tokens.json
 
 # logs
 errors.log
