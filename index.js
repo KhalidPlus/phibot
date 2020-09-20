@@ -273,7 +273,7 @@ function onMessage(jsonMsg){
 
 
 var cleverbotConvos = {};
-async function onWhisper(username, message){
+async function onWhisper(username, message, jsonMsg){
     var rawText = '';
     function iterateMsg(jmessage){
         if(jmessage.text != undefined){
