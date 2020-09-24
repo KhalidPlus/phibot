@@ -161,6 +161,10 @@ async function startBot(){
     bot.on('playerLeft', function(player){
         onPlayerLeft(player);
     });
+
+    bot.on('kicked, function(reason, loggedIn){
+        logEvent(`Kicked for reason:${reason}\nAfter logging in: ${loggedIn}`);
+    });
 }
 startBot();
 
