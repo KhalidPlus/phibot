@@ -162,7 +162,7 @@ async function startBot(){
         onPlayerLeft(player);
     });
 
-    bot.on('kicked, function(reason, loggedIn){
+    bot.on('kicked', function(reason, loggedIn){
         logEvent(`Kicked for reason:${reason}\nAfter logging in: ${loggedIn}`);
     });
 }
