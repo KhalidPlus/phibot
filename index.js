@@ -117,6 +117,7 @@ function escapeHtml(unsafe) {
 
 var waitingForOnline = false;
 async function startBot(){
+    if(bot != undefined) return;
     let pingResponse = await mcping(credentials);
     if(pingResponse.errno){
         if(!waitingForOnline) logEvent('Not starting bot because server offline');
@@ -143,6 +144,7 @@ async function startBot(){
 
     bot.on('end', function(){
         logEvent('Connection ended');
+        bot = undefined;
         setTimeout(startBot, 10000);
     });
 
