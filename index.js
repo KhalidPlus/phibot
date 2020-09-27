@@ -344,6 +344,7 @@ function onPlayerLeft(player){
 
 
 setInterval(function(){
+    if(bot == undefined) return;
     if(bot.entity != undefined){
         var yaw = Math.random() * 2 * Math.PI - Math.PI;
         var pitch = Math.random() * Math.PI - (0.5 * Math.PI);
