@@ -91,6 +91,7 @@ commands.git = commands.github = require('./modules/git')(say);
 commands.contact = require('./modules/contact')(say);
 commands.time = require('./modules/timezone')(say);
 commands.urbandictionary = commands.ud = require('./modules/urbandictionary')(say);
+commands.number = require('./modules/number')(say);
 
 
 function greenText(text){

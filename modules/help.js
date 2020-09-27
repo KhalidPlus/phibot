@@ -1,8 +1,9 @@
 const helpCommands = {
-    "help": "?help <contact, pornhub, fact, dadjoke, time, exchange, convert, rule, seed, 8ball, ping, bestping, worstping, averageping, namemc, firstmsg, lastmsg, msgcount, popbob, jared2013, record, mcfact, ud, calc>",
+    "help": "?help <number, contact, pornhub, fact, dadjoke, time, exchange, convert, rule, seed, 8ball, ping, bestping, worstping, averageping, namemc, firstmsg, lastmsg, msgcount, popbob, jared2013, record, mcfact, ud, calc>",
     // "help": "?help <discord, setdiscord, contact, pornhub, 1337x, fact, dadjoke, time, exchange, convert, rule, seed, 8ball, ping, bestping, worstping, averageping, namemc, firstmsg, lastmsg, msgcount, popbob, jared2013, record, mcfact, ud, calc>",
     // "discord": "?discord <username> ≫ Get someone's Discord tag.",
     // "setdiscord": "?setdiscord <discord tag> ≫ Set your Discord tag so people can get in touch with you.",
+    "number": "?number <number> ≫ Get a random fact about a number.",
     "contact": "?contact ≫ Returns how to get in touch with the bot developer.",
     "pornhub": "?pornhub (?ph) <search term> ≫ Search PornHub.",
     "tpb": "?thepiratebay (?tpb) <search term> ≫ Search The Pirate Bay. (disabled due to block)",
