@@ -22,4 +22,3 @@ commands['firstmsg'] = commands['firstmessage'] = commands['firstwords'] = funct
         }, 2000);
     });
 }
-
