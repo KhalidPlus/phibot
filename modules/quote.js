@@ -12,28 +12,19 @@ async function quote(username, args){
         say('Please enter a name between 6 and 100 characters.');
         return;
     }
-    const searchResponse = await fetch(`https://www.brainyquote.com/api/suggest?m=0&langc=en&query=${encodeURIComponent(searchTerm)}`);
-    const searchResponseJSON = await searchResponse.json();
-    let quotesURL;
-    for(let suggestion of searchResponseJSON.suggestions){
-        if(suggestion.data.url.startsWith('/authors/')){
-            quotesURL = 'https://www.brainyquote.com' + suggestion.data.url;
-            break;
-        }
-    }
-    if(quotesURL == undefined){
-        say(`No search results for "${searchTerm}".`);
-        return;
-    }
-    const resultsResponse = await fetch(quotesURL);
-    const resultsResponseText = await resultsResponse.text();
-    const resultsPage = new JSDOM(resultsResponseText).window.document;
-    const resultsQuotes = resultsPage.getElementsByClassName('grid-item boxy');
-    const pickedQuote = randomPick(resultsQuotes);
-    
-    const quoteText = pickedQuote.getElementsByClassName('oncl_q')[0].textContent;
-    const quoteName = pickedQuote.getElementsByClassName('oncl_a')[0].textContent;
-    say(`❝${quoteText}❞ ～${quoteName}`);   
+    const response = await fetch(`https://www.azquotes.com/search_results.html?query=${encodeURIComponent(searchTerm)}`);
+    const responseHTML = await response.text();
+    const resultsPage = new JSDOM(responseHTML).window.document;
+    const quoteBlocks = resultsPage.getElementsByClassName('wrap-block');
+    if(quoteBlocks.length < 1) return say("Couldn't find any quotes, did you spell the name correctly? Is the person famous enough to have quotes?");
+    const pickedQuote = randomPick(quoteBlocks);
+    const quoteTitles = pickedQuote.getElementsByClassName('title');
+    if(quoteTitles.length != 1) return say("Error extracting quote text.");
+    const quoteText  = quoteTitles[0].textContent.trim();
+    const quoteAuthors = pickedQuote.getElementsByClassName('author');
+    if(quoteAuthors.length != 1) return say("Error extracting quote author.");
+    const quoteAuthor = quoteAuthors[0].textContent.trim();
+    say(`❝${quoteText}❞ ～${quoteAuthor}`); 
 }
 
 module.exports = function(sayFunc){
