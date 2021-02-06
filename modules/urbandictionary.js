@@ -6,7 +6,7 @@ var say;
 async function ud(username, args){
     const searchTerm = args.join(' ');
     if(searchTerm.length < 3 || searchTerm.length > 64){
-        say('Please enter a name between 3 and 64 characters.');
+        say('Please enter a term between 3 and 64 characters.');
         return;
     }
     const searchResponse = await fetch(`https://www.urbandictionary.com/define.php?term=${encodeURIComponent(searchTerm)}`);
